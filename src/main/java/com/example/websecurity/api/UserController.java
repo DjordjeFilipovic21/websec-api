@@ -21,12 +21,21 @@ public class UserController {
     private final AuthenticationFacade authenticationFacade;
 
     @Operation(summary = "Authenticate User", description = "Authenticate user")
-    @PostMapping("/login")
+    @PostMapping("/login2")
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request
     ) {
         log.info("User Controller: Received login request: {}", request);
         return ResponseEntity.ok(authenticationFacade.authenticate(request));
+    }
+
+    @Operation(summary = "Authenticate User", description = "Authenticate user user enumeration vuln")
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> loginVuln(
+            @RequestBody AuthenticationRequest request
+    ) {
+        log.info("User Controller: Received login vuln request: {}", request);
+        return ResponseEntity.ok(authenticationFacade.authenticateVuln(request));
     }
 
 }
