@@ -24,7 +24,7 @@ Make sure MySQL server is running: \
 2. `use websec;`
 3. Import data
 
-
+    
     INSERT INTO user ( 
     created, 
     updated, 
