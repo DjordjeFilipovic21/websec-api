@@ -1,6 +1,7 @@
 package com.example.websecurity.service;
 
 import com.example.websecurity.exception.AccessDeniedException;
+import com.example.websecurity.exception.WebSecMissingDataException;
 import com.example.websecurity.persistence.Movie;
 import com.example.websecurity.persistence.MovieRepository;
 import com.example.websecurity.persistence.User;
@@ -16,10 +17,10 @@ import static lombok.AccessLevel.PACKAGE;
 public class MovieService {
     private final MovieRepository movieRepository;
 
-    public Movie getMovieById(Long id, User user) {
+    public Movie getMovieById(Long id) {
         log.info("Movie Service: Getting movie from database by id: {}", id);
-        Movie movie = movieRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new AccessDeniedException("You do not have access to this movie"));
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new WebSecMissingDataException("Movie with id " + id + " not found"));
         log.info("Movie Service: Found movie with title: {}", movie.getTitle());
         return movie;
     }

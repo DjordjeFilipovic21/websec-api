@@ -17,9 +17,9 @@ public class MovieFacade {
 
     private final MovieService movieService;
 
-    public MovieResponse getMovieById(Long id, User user) {
+    public MovieResponse getMovieById(Long id) {
         log.info("Movie Facade: Getting movie by id: {}", id);
-        Movie movie = movieService.getMovieById(id, user);
+        Movie movie = movieService.getMovieById(id);
         return MovieResponse.builder()
                 .id(movie.getId())
                 .title(movie.getTitle())
