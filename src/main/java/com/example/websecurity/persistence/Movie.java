@@ -29,6 +29,10 @@ public class Movie {
     @Column(name = "imdb_score")
     private Integer imdbScore;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private ZonedDateTime created;
 
