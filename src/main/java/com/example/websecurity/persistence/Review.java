@@ -11,27 +11,24 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @Setter
 @Getter
-public class Movie {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id;
 
-    private String title;
-    private String director;
-    private Integer year;
-    private String description;
-
-    @Column(name = "running_time")
-    private Integer runningTime;
-
-    @Column(name = "imdb_score")
-    private Integer imdbScore;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @Column(name = "movie_title")
+    private String movieTitle;
+
+    @Column(name = "review_text")
+    private String reviewText;
+
+    private Double rating;
 
     @Column(nullable = false)
     private ZonedDateTime created;
@@ -48,5 +45,4 @@ public class Movie {
         }
         setUpdated(now);
     }
-
 }
