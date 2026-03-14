@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -32,12 +33,11 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!user.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         log.info("Review Controller: User {} requested a review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.getReviewById(reviewId);
-        return ResponseEntity.ok(reviewResponse);
+        return ResponseEntity.ok(reviewFacade.getReviewById(reviewId, user));
     }
 
     @Operation(summary = "Update review by id", description = "Update review by id")
@@ -49,12 +49,11 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!user.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         log.info("Review Controller: User {} requested an update for review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.updateReview(reviewId, updateReviewRequest);
-        return ResponseEntity.ok(reviewResponse);
+        return ResponseEntity.ok(reviewFacade.updateReview(reviewId, updateReviewRequest, user));
     }
 
     @Operation(summary = "Get all reviews for user", description = "Get all reviews for user")
@@ -64,11 +63,10 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!user.getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         log.info("Review Controller: User {} requested reviews", user.getEmail());
-        List<ReviewResponse> reviewResponses = reviewFacade.getReviewsForUser(userId);
-        return ResponseEntity.ok(reviewResponses);
+        return ResponseEntity.ok(reviewFacade.getReviewsForUser(userId));
     }
 }
