@@ -42,8 +42,13 @@ public class AuthenticationFacade {
             );
         } catch (Exception e) {
             loginAttemptService.recordFailure(request.getEmail());
-            long seconds = loginAttemptService.getSecondsUntilUnlock(request.getEmail());
-            throw new AccountLockedException("Invalid credentials. Account locked for " + seconds + " seconds.");
+
+            if (loginAttemptService.isLocked(request.getEmail())) {
+                long seconds = loginAttemptService.getSecondsUntilUnlock(request.getEmail());
+                throw new AccountLockedException("Too many failed attempts. Try again in " + seconds + " seconds.");
+            }
+
+            throw new AccountLockedException("Invalid credentials.");
         }
 
         loginAttemptService.resetAttempts(request.getEmail());

@@ -13,15 +13,18 @@ public class LoginAttemptService {
 
     private static final int[] LOCKOUT_SECONDS = {10, 30, 60, 300};
 
+    private static final int MAX_ATTEMPTS = 3;
+
     public void recordFailure(String email) {
         int count = attempts.getOrDefault(email, 0) + 1;
         attempts.put(email, count);
 
-        int index = Math.min(count - 1, LOCKOUT_SECONDS.length - 1);
-        int lockSeconds = LOCKOUT_SECONDS[index];
-        lockUntil.put(email, Instant.now().plusSeconds(lockSeconds));
+        if (count >= MAX_ATTEMPTS) {
+            int index = Math.min(count - MAX_ATTEMPTS, LOCKOUT_SECONDS.length - 1);
+            int lockSeconds = LOCKOUT_SECONDS[index];
+            lockUntil.put(email, Instant.now().plusSeconds(lockSeconds));
+        }
     }
-
     public boolean isLocked(String email) {
         Instant until = lockUntil.get(email);
         if (until == null) return false;
