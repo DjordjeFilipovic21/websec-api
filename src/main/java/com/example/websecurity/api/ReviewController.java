@@ -1,8 +1,8 @@
 package com.example.websecurity.api;
 
-import com.example.websecurity.api.dto.MovieResponse;
 import com.example.websecurity.api.dto.ReviewResponse;
 import com.example.websecurity.api.dto.UpdateReviewRequest;
+import com.example.websecurity.exception.ForbiddenAccessException;
 import com.example.websecurity.facade.ReviewFacade;
 import com.example.websecurity.persistence.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping()
@@ -32,11 +33,11 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!Objects.equals(user.getId(), userId)) {
+            throw new ForbiddenAccessException("Access denied for requested user resource");
         }
         log.info("Review Controller: User {} requested a review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.getReviewById(reviewId);
+        ReviewResponse reviewResponse = reviewFacade.getReviewById(reviewId, user.getId());
         return ResponseEntity.ok(reviewResponse);
     }
 
@@ -49,11 +50,11 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!Objects.equals(user.getId(), userId)) {
+            throw new ForbiddenAccessException("Access denied for requested user resource");
         }
         log.info("Review Controller: User {} requested an update for review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.updateReview(reviewId, updateReviewRequest);
+        ReviewResponse reviewResponse = reviewFacade.updateReview(reviewId, user.getId(), updateReviewRequest);
         return ResponseEntity.ok(reviewResponse);
     }
 
@@ -64,11 +65,11 @@ public class ReviewController {
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
-        if (user.getId() != userId) {
-            return ResponseEntity.badRequest().build();
+        if (!Objects.equals(user.getId(), userId)) {
+            throw new ForbiddenAccessException("Access denied for requested user resource");
         }
         log.info("Review Controller: User {} requested reviews", user.getEmail());
-        List<ReviewResponse> reviewResponses = reviewFacade.getReviewsForUser(userId);
+        List<ReviewResponse> reviewResponses = reviewFacade.getReviewsForUser(user.getId());
         return ResponseEntity.ok(reviewResponses);
     }
 }

@@ -85,6 +85,34 @@ Make sure MySQL server is running: \
 password for maja@maja: password \
 password for pera@pera: password123 \
 
+## Security hardening (Zadatak 2)
+Implemented protections:
+- IDOR protection for review endpoints (`GET/PUT /user/{userId}/review/{reviewId}`):
+  - `403 Forbidden` when `userId` in path does not match authenticated user.
+  - `404 Not Found` when review does not belong to authenticated user.
+- Dictionary/brute-force protection on `POST /auth/login`:
+  - After `5` consecutive failed attempts, account is locked for `2` minutes.
+  - During lockout, API returns `429 Too Many Requests` with `retryAfterSeconds` and `lockoutUntil`.
+  - Successful login resets failed attempt counter and clears lockout.
+
+Database note:
+- `user` table now has `failed_login_attempts` and `lockout_until` columns.
+- With current config `spring.jpa.hibernate.ddl-auto=update`, columns are auto-created on startup.
+
+Manual verification:
+1. Dictionary attack lockout check:
+   - Run multiple failed logins for an existing user:
+     `curl -i -X POST http://localhost:8088/auth/login -H "Content-Type: application/json" -d '{"email":"maja@maja.com","password":"wrong"}'`
+   - On/after 5th failure, response should be `429` and include retry info.
+2. IDOR check:
+   - Login as user A and use token.
+   - Try to access user B review:
+     `curl -i -H "Authorization: Bearer <token-user-a>" http://localhost:8088/user/2/review/<review_of_user_2>`
+     Expected: `403` (path mismatch) or `404` for non-owned review.
+   - Access own review:
+     `curl -i -H "Authorization: Bearer <token-user-a>" http://localhost:8088/user/1/review/<review_of_user_1>`
+     Expected: `200`.
+
 ## Run
 `java -jar target/web-security.jar`
 

@@ -19,8 +19,8 @@ public class ReviewFacade {
 
     private final ReviewService reviewService;
 
-    public ReviewResponse getReviewById(Long id) {
-        Review review = reviewService.getReviewById(id);
+    public ReviewResponse getReviewById(Long reviewId, Long userId) {
+        Review review = reviewService.getReviewByIdForUser(reviewId, userId);
         return ReviewResponse.builder()
                 .id(review.getId())
                 .movieTitle(review.getMovieTitle())
@@ -30,8 +30,8 @@ public class ReviewFacade {
                 .build();
     }
 
-    public ReviewResponse updateReview(Long id, UpdateReviewRequest updateReviewRequest) {
-        Review review = reviewService.getReviewById(id);
+    public ReviewResponse updateReview(Long reviewId, Long userId, UpdateReviewRequest updateReviewRequest) {
+        Review review = reviewService.getReviewByIdForUser(reviewId, userId);
         review.setReviewText(updateReviewRequest.getReviewText());
         review.setRating(updateReviewRequest.getRating());
         Review updatedReview = reviewService.updateReview(review);
