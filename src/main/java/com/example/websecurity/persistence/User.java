@@ -26,6 +26,8 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
+    private Integer failedLoginAttempts;
+    private ZonedDateTime lockoutUntil;
 
     @Column(nullable = false)
     private ZonedDateTime created;
@@ -39,6 +41,9 @@ public class User implements UserDetails {
         ZonedDateTime now = ZonedDateTime.now();
         if (getCreated() == null) {
             setCreated(now);
+        }
+        if (getFailedLoginAttempts() == null) {
+            setFailedLoginAttempts(0);
         }
         setUpdated(now);
     }

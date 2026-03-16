@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import static lombok.AccessLevel.PACKAGE;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor(access = PACKAGE)
@@ -20,5 +21,13 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new WebSecMissingDataException("User with email " + email + " not found"));
         log.info("User Service: Found user with id: {} and email: {}", user.getId(), user.getEmail());
         return user;
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 }

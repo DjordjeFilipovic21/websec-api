@@ -25,7 +25,7 @@ public class UserController {
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request
     ) {
-        log.info("User Controller: Received login request: {}", request);
+        log.info("User Controller: Received login request for email: {}", request.getEmail());
         return ResponseEntity.ok(authenticationFacade.authenticate(request));
     }
 
