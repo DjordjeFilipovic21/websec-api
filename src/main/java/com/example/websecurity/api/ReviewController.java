@@ -36,7 +36,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().build();
         }
         log.info("Review Controller: User {} requested a review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.getReviewById(reviewId);
+        ReviewResponse reviewResponse = reviewFacade.getReviewById(reviewId, userId);
         return ResponseEntity.ok(reviewResponse);
     }
 
@@ -53,7 +53,7 @@ public class ReviewController {
             return ResponseEntity.badRequest().build();
         }
         log.info("Review Controller: User {} requested an update for review with id {}", user.getEmail(), reviewId);
-        ReviewResponse reviewResponse = reviewFacade.updateReview(reviewId, updateReviewRequest);
+        ReviewResponse reviewResponse = reviewFacade.updateReview(reviewId, userId, updateReviewRequest);
         return ResponseEntity.ok(reviewResponse);
     }
 

@@ -18,9 +18,14 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
 
-
+    // Ovde je IDOR vulnerability bio..
     public Review getReviewById(Long id) {
         return reviewRepository.findById(id).orElseThrow(() -> new WebSecMissingDataException("Review with id " + id + " not found"));
+    }
+
+    public Review getReviewByIdForUser(Long reviewId, Long userId) {
+        return reviewRepository.findByIdAndUserId(reviewId, userId)
+                .orElseThrow(() -> new WebSecMissingDataException("Review with id " + reviewId + " not found for user " + userId));
     }
 
     public Review updateReview(Review review) {
