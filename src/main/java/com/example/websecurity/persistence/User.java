@@ -26,6 +26,8 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
+    private Integer failedLoginAttempts;
+    private ZonedDateTime loginBlockedUntil;
 
     @Column(nullable = false)
     private ZonedDateTime created;
@@ -60,7 +62,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return loginBlockedUntil == null || !loginBlockedUntil.isAfter(ZonedDateTime.now());
     }
 
     @Override

@@ -7,10 +7,14 @@ import com.example.websecurity.service.UserService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -24,14 +28,33 @@ public class AuthenticationFacade {
     @Transactional
     public AuthenticationResponse authenticate(@NotNull AuthenticationRequest request) {
         log.info("Authentication Facade: Authenticating user with request: {}", request);
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+        var userOptional = userService.getOptionalUserByEmail(request.getEmail());
+
+        if (userOptional.isPresent() && userService.isLoginBlocked(userOptional.get())) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Login temporarily disabled. Try again later.");
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException ex) {
+            if (userOptional.isPresent()) {
+                userService.registerFailedLogin(userOptional.get());
+                if (userService.isLoginBlocked(userOptional.get())) {
+                    throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Too many failed attempts. Login temporarily disabled.");
+                }
+            }
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
+        } catch (LockedException ex) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Login temporarily disabled. Try again later.");
+        }
 
         var user = userService.getUserByEmail(request.getEmail());
+        userService.resetFailedLogins(user);
         var accessToken = jwtService.generateAccessToken(user);
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
