@@ -27,7 +27,10 @@ public class UserController {
     public ResponseEntity<AuthenticationResponse> login(
             @RequestBody AuthenticationRequest request
     ) {
+        /*
+        ispravljeno, ne smemo logovati senzitivan info, ovo je lako pogresiti zbog lomboka jer se ne vide getteri za password a @Data automatski generise toString sa passwordom!
         log.info("User Controller: Received login request: {}", request);
+        */
         System.out.println(org.apache.logging.log4j.LogManager.getLogger().getClass());
         return ResponseEntity.ok(authenticationFacade.authenticate(request));
     }

@@ -27,7 +27,10 @@ public class AuthenticationFacade {
 
     @Transactional
     public AuthenticationResponse authenticate(@NotNull AuthenticationRequest request) {
+        /*
+        ispravljeno, ne smemo logovati senzitivan info, ovo je lako pogresiti zbog lomboka jer se ne vide getteri za password a @Data automatski generise toString sa passwordom!
         log.info("Authentication Facade: Authenticating user with request: {}", request);
+        */
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
