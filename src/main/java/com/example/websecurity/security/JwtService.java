@@ -37,13 +37,14 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // token traje 1 sat
                 .signWith(getSignInKey())
                 .compact();
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername());
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
@@ -55,16 +56,19 @@ public class JwtService {
         return extractAllClaims(token).get(claimName, String.class);
     }
 
+    private boolean isTokenExpired(String token) {
+        Date expiration = extractClaim(token, Claims::getExpiration);
+        return expiration.before(new Date());
+    }
+
+
     private Claims extractAllClaims(String token) {
         try {
-            String[] parts = token.split("\\.");
-            String payloadJson = new String(Base64.getDecoder().decode(parts[1]));
-
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> map = mapper.readValue(payloadJson, Map.class);
-
-            return Jwts.claims(map);
-
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (Exception e) {
             throw new RuntimeException("Invalid token");
         }
